@@ -1,4 +1,4 @@
 [submodule "caffe-fast-rcnn"]
-	path = caffe
-	url = https://github.com/BVLC/caffe.git
-	branch = fast-rcnn
+	path = caffe-fast-rcnn
+	url = https://github.com/WemboLi/caffe-fast-rcnn.git
+	branch = faster-rcnn-upstream-33f2445
