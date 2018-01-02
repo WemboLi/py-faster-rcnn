@@ -106,9 +106,28 @@ class imdb(object):
             boxes = self.roidb[i]['boxes'].copy()
             oldx1 = boxes[:, 0].copy()
             oldx2 = boxes[:, 2].copy()
+            print 'boxes widths are'
+            print widths[i], oldx2
+            # boxes[:, 0] = max(widths[i] - oldx2 - 1, 0)
+            # boxes[:, 2] = max(widths[i] - oldx1 - 1, 0)
+            
+            # 0 should be np.zeros(boxes.shape[0], 1)
+            # left_th = np.zeros((boxes.shape[0], 1))
+
             boxes[:, 0] = widths[i] - oldx2 - 1
             boxes[:, 2] = widths[i] - oldx1 - 1
+
+            zero_inds = np.where(boxes[:, 0] <  0)[0]
+            boxes[zero_inds, 0] = 0
+       
             assert (boxes[:, 2] >= boxes[:, 0]).all()
+            assert(boxes[:,  0] >= 0).all()
+            assert(boxes[:, 2] >= 0).all()
+             
+            # if((boxes[:, 2] < boxes[:, 0]).any()):
+               # print 'class id {}, number of object: {}\n'.format(self.roidb[i]['gt_classes'] , i)
+               # print widths[i], oldx1, oldx2, boxes[:, 0],  boxes[:, 2]
+           
             entry = {'boxes' : boxes,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],
                      'gt_classes' : self.roidb[i]['gt_classes'],

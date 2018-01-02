@@ -15,15 +15,17 @@ def parse_rec(filename):
     objects = []
     for obj in tree.findall('object'):
         obj_struct = {}
-        obj_struct['name'] = obj.find('name').text
-        obj_struct['pose'] = obj.find('pose').text
-        obj_struct['truncated'] = int(obj.find('truncated').text)
-        obj_struct['difficult'] = int(obj.find('difficult').text)
-        bbox = obj.find('bndbox')
-        obj_struct['bbox'] = [int(bbox.find('xmin').text),
-                              int(bbox.find('ymin').text),
-                              int(bbox.find('xmax').text),
-                              int(bbox.find('ymax').text)]
+        obj_struct['name'] = obj.find('.//name').text
+        obj_struct['pose'] = obj.find('.//pose').text
+        obj_struct['truncated'] = int(obj.find('.//truncated').text)
+        obj_struct['difficult'] = int(obj.find('.//difficult').text)
+        bbox = obj.find('.//bndbox')
+        
+        # change the coordinates of the bbgt to float, because there are some float numbers in the annotation
+        obj_struct['bbox'] = [float(bbox.find('xmin').text),
+                              float(bbox.find('ymin').text),
+                              float(bbox.find('xmax').text),
+                              float(bbox.find('ymax').text)]
         objects.append(obj_struct)
 
     return objects
@@ -100,13 +102,15 @@ def voc_eval(detpath,
     # read list of images
     with open(imagesetfile, 'r') as f:
         lines = f.readlines()
+
+    # in case of lines have extension
     imagenames = [x.strip() for x in lines]
 
     if not os.path.isfile(cachefile):
         # load annots
         recs = {}
         for i, imagename in enumerate(imagenames):
-            recs[imagename] = parse_rec(annopath.format(imagename))
+            recs[imagename] = parse_rec(annopath.format(os.path.split(os.path.splitext(imagename)[0])[1]))
             if i % 100 == 0:
                 print 'Reading annotation for {:d}/{:d}'.format(
                     i + 1, len(imagenames))
@@ -143,6 +147,10 @@ def voc_eval(detpath,
     BB = np.array([[float(z) for z in x[2:]] for x in splitlines])
 
     # sort by confidence
+    # in case there is no bbox detected in the dec file
+    if confidence.size < 1:
+       return np.array([0]), np.array([0]), np.array([0])    
+
     sorted_ind = np.argsort(-confidence)
     sorted_scores = np.sort(-confidence)
     BB = BB[sorted_ind, :]

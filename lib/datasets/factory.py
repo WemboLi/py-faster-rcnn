@@ -11,6 +11,8 @@ __sets = {}
 
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
+from datasets.logos_33 import logos
+from datasets.dunion import dunion
 import numpy as np
 
 # Set up voc_<year>_<split> using selective search "fast" mode
@@ -30,6 +32,15 @@ for year in ['2015']:
     for split in ['test', 'test-dev']:
         name = 'coco_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: coco(split, year))
+
+# Set up Logos_33_<split>(train)
+year = '2017'
+for split in  ['trainval', 'test']:
+    name = 'logos_{}_{}'.format(year, split)
+    __sets[name] = (lambda split=split, year=year: logos(split,year))
+    name = 'dunion_{}_{}'.format(year, split)
+    __sets[name] = (lambda split=split, year=year: dunion(split,year))
+
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
